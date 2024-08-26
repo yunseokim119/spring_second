@@ -15,6 +15,10 @@ public class Comment {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "schedule_id", nullable = false)
+    private Schedule schedule;
+
     @Column(nullable = false)
     private String content;
 
@@ -24,10 +28,18 @@ public class Comment {
     @Column(nullable = false)
     private LocalDateTime modifiedDate;
 
-    @Column(nullable = false)
-    private String userName;
-
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "schedule_id")
-    private Schedule schedule;
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    public Comment() {
+    }
+
+    public Comment(Schedule schedule, String content, User user) {
+        this.schedule = schedule;
+        this.content = content;
+        this.createdDate = LocalDateTime.now();
+        this.modifiedDate = LocalDateTime.now();
+        this.user = user;
+    }
 }

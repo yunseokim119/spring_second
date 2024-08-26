@@ -5,9 +5,10 @@ import com.sparta.springsecondys.dto.ScheduleResponseDto;
 import com.sparta.springsecondys.service.ScheduleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 
 @RestController
 @RequestMapping("/api")
@@ -16,12 +17,6 @@ public class ScheduleController {
     @Autowired
     private  ScheduleService scheduleService;
 
-    @GetMapping
-    public Page<ScheduleResponseDto> getSchedules(
-            @RequestParam(value = "page", defaultValue = "0") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size) {
-        return scheduleService.getSchedules(page, size);
-    }
 
     @PostMapping("/schedules")
     public ResponseEntity<ScheduleResponseDto> createSchedule(@RequestBody ScheduleRequestDto requestDto) {
@@ -48,7 +43,22 @@ public class ScheduleController {
     }
 
     @DeleteMapping("/schedules/{id}")
-    public void deleteSchedule(@PathVariable Long id) {
-        scheduleService.deleteSchedule(id);
+    public ResponseEntity<Void> deleteSchedule(@PathVariable Long id) {
+        try {
+            scheduleService.deleteSchedule(id);
+            return ResponseEntity.noContent().build();
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    // 일정 페이징 조회
+    @GetMapping
+    public ResponseEntity<Page<ScheduleResponseDto>> getSchedules(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<ScheduleResponseDto> schedulePage = scheduleService.getAllSchedules(pageable);
+        return ResponseEntity.ok(schedulePage);
     }
 }
