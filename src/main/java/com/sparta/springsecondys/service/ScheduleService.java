@@ -51,4 +51,12 @@ public class ScheduleService {
             return new ScheduleResponseDto(updatedSchedule);
         }).orElseThrow(() -> new RuntimeException("일치하는 일정이 없습니다. " + id));
     }
+
+    public void deleteSchedule(Long id) {
+        if (scheduleRepository.existsById(id)) {
+            scheduleRepository.deleteById(id);
+        } else {
+            throw new RuntimeException("일치하는 일정이 없습니다. ID: " + id);
+        }
+    }
 }
