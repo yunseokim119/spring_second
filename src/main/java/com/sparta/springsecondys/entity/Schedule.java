@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -30,4 +31,17 @@ public class Schedule {
     @Column(nullable = false)
     private LocalDateTime modifiedDate;
 
+    @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Comment> comments;
+
+    public Schedule() {
+    }
+
+    public Schedule(String userName, String title, String content) {
+        this.userName = userName;
+        this.title = title;
+        this.content = content;
+        this.createdDate = LocalDateTime.now();
+        this.modifiedDate = LocalDateTime.now();
+    }
 }

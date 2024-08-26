@@ -4,6 +4,11 @@ import com.sparta.springsecondys.dto.ScheduleRequestDto;
 import com.sparta.springsecondys.dto.ScheduleResponseDto;
 import com.sparta.springsecondys.entity.Schedule;
 import com.sparta.springsecondys.repository.ScheduleRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -11,10 +16,14 @@ import java.util.Optional;
 
 @Service
 public class ScheduleService {
-    private final ScheduleRepository scheduleRepository;
+    @Autowired
+    private ScheduleRepository scheduleRepository;
 
-    public ScheduleService(ScheduleRepository scheduleRepository) {
-        this.scheduleRepository = scheduleRepository;
+    // 페이징 처리를 포함한 일정 목록 조회
+    public Page<ScheduleResponseDto> getSchedules(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size, Sort.by("modifiedDate").descending());
+        Page<Schedule> schedules = scheduleRepository.findAll(pageable);
+        return schedules.map(ScheduleResponseDto::new);
     }
 
     public ScheduleResponseDto saveSchedule(ScheduleRequestDto requestDto) {

@@ -4,6 +4,7 @@ import com.sparta.springsecondys.dto.ScheduleRequestDto;
 import com.sparta.springsecondys.dto.ScheduleResponseDto;
 import com.sparta.springsecondys.service.ScheduleService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -12,11 +13,14 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api")
 public class ScheduleController {
 
-    private  final ScheduleService scheduleService;
-
     @Autowired
-    private ScheduleController(ScheduleService scheduleService) {
-        this.scheduleService = scheduleService;
+    private  ScheduleService scheduleService;
+
+    @GetMapping
+    public Page<ScheduleResponseDto> getSchedules(
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
+        return scheduleService.getSchedules(page, size);
     }
 
     @PostMapping("/schedules")
