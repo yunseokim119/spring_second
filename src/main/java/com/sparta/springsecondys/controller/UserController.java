@@ -2,13 +2,11 @@ package com.sparta.springsecondys.controller;
 
 import com.sparta.springsecondys.dto.UserRequestDto;
 import com.sparta.springsecondys.dto.UserResponseDto;
-import com.sparta.springsecondys.entity.User;
 import com.sparta.springsecondys.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/users")
@@ -18,7 +16,7 @@ public class UserController {
 
     @PostMapping
     public UserResponseDto createUser(@RequestBody UserRequestDto requestDto) {
-        return userService.saveUser(requestDto);
+        return userService.createUser(requestDto);
     }
 
     @GetMapping("/{id}")

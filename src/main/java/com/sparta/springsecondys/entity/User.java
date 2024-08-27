@@ -13,7 +13,7 @@ import java.util.Set;
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private Long id;
 
     @Column(unique = true, nullable = false)
     private String username;
@@ -27,15 +27,16 @@ public class User {
     @Column(nullable = false)
     private LocalDateTime modifiedDate;
 
-    @OneToMany(mappedBy = "owner")
-    private Set<Schedule> ownedSchedules;
+    @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Schedule> schedules;
 
-    @ManyToMany(mappedBy = "assignedUsers")
-    private Set<Schedule> assignedSchedules;
+    @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Comment> comments;
 
     public User() {
     }
-    public User(String username, String email) {
+    public User(Long id, String username, String email) {
+        this.id = id;
         this.username = username;
         this.email = email;
         this.createdDate = LocalDateTime.now();

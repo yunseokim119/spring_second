@@ -16,10 +16,10 @@ public class UserService {
     @Autowired
     private UserRepository userRepository;
 
-    public UserResponseDto saveUser(UserRequestDto userRequestDto) {
+    public UserResponseDto createUser(UserRequestDto requestDto) {
         User user = new User();
-        user.setUsername(userRequestDto.getUsername());
-        user.setEmail(userRequestDto.getEmail());
+        user.setUsername(requestDto.getUsername());
+        user.setEmail(requestDto.getEmail());
         user.setCreatedDate(LocalDateTime.now());
         user.setModifiedDate(LocalDateTime.now());
 

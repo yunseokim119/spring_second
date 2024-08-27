@@ -18,8 +18,8 @@ import java.util.Optional;
 
 @Service
 public class ScheduleService {
-    @Autowired
-    private ScheduleRepository scheduleRepository;
+    private final ScheduleRepository scheduleRepository;
+    private final UserRepository userRepository;
 
     @Autowired
     private UserRepository userRepository;
@@ -35,7 +35,9 @@ public class ScheduleService {
         schedule.setCreatedDate(LocalDateTime.now());
         schedule.setModifiedDate(LocalDateTime.now());
 
+        Schedule schedule = new Schedule(user, scheduleRequestDto.getTitle(), scheduleRequestDto.getContent());
         Schedule savedSchedule = scheduleRepository.save(schedule);
+
         return new ScheduleResponseDto(savedSchedule);
     }
 
@@ -44,6 +46,7 @@ public class ScheduleService {
                 .map(ScheduleResponseDto::new);
     }
 
+    // 일정 수정
     public ScheduleResponseDto updateSchedule(Long id, ScheduleRequestDto updatedScheduleDto) {
         Schedule schedule = scheduleRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("일치하는 일정이 없습니다. ID: " + id));
@@ -56,6 +59,7 @@ public class ScheduleService {
         return new ScheduleResponseDto(updatedSchedule);
     }
 
+    // 일정 삭제
     public void deleteSchedule(Long id) {
         if (scheduleRepository.existsById(id)) {
             scheduleRepository.deleteById(id);
