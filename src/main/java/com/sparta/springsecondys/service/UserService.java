@@ -54,7 +54,7 @@ public class UserService {
         if (userRepository.existsById(id)) {
             userRepository.deleteById(id);
         } else {
-            throw new RuntimeException("User not found with id " + id);
+            throw new RuntimeException("일치하는 사용자가 없습니다." + id);
         }
     }
 }

@@ -27,11 +27,17 @@ public class User {
     @Column(nullable = false)
     private LocalDateTime modifiedDate;
 
+    // 사용자가 작성한 일정을 나타내는 필드
     @OneToMany(mappedBy = "owner", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Schedule> schedules;
 
+    // 사용자가 댓글을 달 수 있는 경우
     @OneToMany(mappedBy = "author", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Comment> comments;
+
+    // 일정을 담당하는 사용자들
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<ScheduleUser> scheduleUsers;
 
     public User() {
     }

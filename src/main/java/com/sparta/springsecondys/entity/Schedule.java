@@ -16,15 +16,15 @@ public class Schedule {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "owner_id", nullable = false)
-    private User owner;
-
     @Column(nullable = false)
     private String title;
 
     @Column(nullable = false)
     private String content;
+
+    @ManyToOne
+    @JoinColumn(name = "owner_id", nullable = false)
+    private User owner;  // 일정 작성자의 유저
 
     @Column(nullable = false)
     private LocalDateTime createdDate;
@@ -32,16 +32,9 @@ public class Schedule {
     @Column(nullable = false)
     private LocalDateTime modifiedDate;
 
-    @ManyToMany
-    @JoinTable(
-            name = "schedule_users",
-            joinColumns = @JoinColumn(name = "schedule_id"),
-            inverseJoinColumns = @JoinColumn(name = "user_id")
-    )
-    private Set<User> assignedUsers;
-
+    // 일정 담당 사용자들
     @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Comment> comments;
+    private Set<ScheduleUser> scheduleUsers;
 
     public Schedule() {
     }
