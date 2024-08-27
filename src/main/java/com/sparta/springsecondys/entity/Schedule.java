@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.List;
+import java.util.Set;
 
 @Entity
 @Getter
@@ -16,8 +16,9 @@ public class Schedule {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String userName;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner_id", nullable = false)
+    private User owner;
 
     @Column(nullable = false)
     private String title;
@@ -31,14 +32,22 @@ public class Schedule {
     @Column(nullable = false)
     private LocalDateTime modifiedDate;
 
+    @ManyToMany
+    @JoinTable(
+            name = "schedule_users",
+            joinColumns = @JoinColumn(name = "schedule_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<User> assignedUsers;
+
     @OneToMany(mappedBy = "schedule", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Comment> comments;
+    private Set<Comment> comments;
 
     public Schedule() {
     }
 
-    public Schedule(String userName, String title, String content) {
-        this.userName = userName;
+    public Schedule(User owner, String title, String content) {
+        this.owner = owner;
         this.title = title;
         this.content = content;
         this.createdDate = LocalDateTime.now();

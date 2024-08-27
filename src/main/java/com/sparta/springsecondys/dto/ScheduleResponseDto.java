@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Getter
 @Setter
@@ -15,7 +17,10 @@ public class ScheduleResponseDto {
     private String content;
     private LocalDateTime createdDate;
     private LocalDateTime modifiedDate;
-    private int commentCount;
+    private List<CommentResponseDto> comments;
+
+    public ScheduleResponseDto() {
+    }
 
     public ScheduleResponseDto(Schedule schedule) {
         this.id = schedule.getId();
@@ -24,7 +29,8 @@ public class ScheduleResponseDto {
         this.content = schedule.getContent();
         this.createdDate = schedule.getCreatedDate();
         this.modifiedDate = schedule.getModifiedDate();
-        this.commentCount = schedule.getComments().size();
+        this.comments = schedule.getComments().stream()
+                .map(CommentResponseDto::new)
+                .collect(Collectors.toList());
     }
-
 }
