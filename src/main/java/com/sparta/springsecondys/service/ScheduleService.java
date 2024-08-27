@@ -8,78 +8,60 @@ import com.sparta.springsecondys.repository.ScheduleRepository;
 import com.sparta.springsecondys.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
 
 @Service
 public class ScheduleService {
-    private final ScheduleRepository scheduleRepository;
-    private final UserRepository userRepository;
+
+    @Autowired
+    private ScheduleRepository scheduleRepository;
 
     @Autowired
     private UserRepository userRepository;
 
     public ScheduleResponseDto saveSchedule(ScheduleRequestDto scheduleRequestDto) {
         User owner = userRepository.findById(scheduleRequestDto.getOwnerId())
-                .orElseThrow(() -> new RuntimeException("일치하는 일정이 없습니다." + scheduleRequestDto.getOwnerId()));
-
+                .orElseThrow(() -> new RuntimeException("일치하는 사용자가 없습니다. " + scheduleRequestDto.getOwnerId()));
         Schedule schedule = new Schedule();
-        schedule.setOwner(owner);
         schedule.setTitle(scheduleRequestDto.getTitle());
         schedule.setContent(scheduleRequestDto.getContent());
+        schedule.setOwner(owner);
         schedule.setCreatedDate(LocalDateTime.now());
         schedule.setModifiedDate(LocalDateTime.now());
 
-        Schedule schedule = new Schedule(user, scheduleRequestDto.getTitle(), scheduleRequestDto.getContent());
         Schedule savedSchedule = scheduleRepository.save(schedule);
-
-        return new ScheduleResponseDto(savedSchedule);
+        return new ScheduleResponseDto(savedSchedule, false);
     }
 
-    public Optional<ScheduleResponseDto> getScheduleById(Long id) {
-        return scheduleRepository.findById(id)
-                .map(ScheduleResponseDto::new);
+    public ScheduleResponseDto getScheduleById(Long id, boolean includeAssignedUsers) {
+        Schedule schedule = scheduleRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("일치하는 일정이 없습니다. ID: " + id));
+        return new ScheduleResponseDto(schedule, includeAssignedUsers);
+    }
+
+    public Page<ScheduleResponseDto> getAllSchedules(Pageable pageable) {
+        return scheduleRepository.findAll(pageable)
+                .map(schedule -> new ScheduleResponseDto(schedule, false));
     }
 
     // 일정 수정
     public ScheduleResponseDto updateSchedule(Long id, ScheduleRequestDto updatedScheduleDto) {
-        Schedule schedule = scheduleRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("일치하는 일정이 없습니다. ID: " + id));
-
-        schedule.setTitle(updatedScheduleDto.getTitle());
-        schedule.setContent(updatedScheduleDto.getContent());
-        schedule.setModifiedDate(LocalDateTime.now());
-
-        Schedule updatedSchedule = scheduleRepository.save(schedule);
-        return new ScheduleResponseDto(updatedSchedule);
+        return scheduleRepository.findById(id).map(schedule -> {
+            schedule.setTitle(updatedScheduleDto.getTitle());
+            schedule.setContent(updatedScheduleDto.getContent());
+            schedule.setModifiedDate(LocalDateTime.now());
+            Schedule updatedSchedule = scheduleRepository.save(schedule);
+            return new ScheduleResponseDto(updatedSchedule, false);
+        }).orElseThrow(() -> new RuntimeException("일치하는 일정이 없습니다. " + id));
     }
 
     // 일정 삭제
     public void deleteSchedule(Long id) {
-        if (scheduleRepository.existsById(id)) {
-            scheduleRepository.deleteById(id);
-        } else {
-            throw new RuntimeException("일치하는 일정이 없습니다." + id);
-        }
-    }
-
-    public void assignUserToSchedule(Long scheduleId, Long userId) {
-        Schedule schedule = scheduleRepository.findById(scheduleId)
-                .orElseThrow(() -> new RuntimeException("일치하는 일정이 없습니다. " + scheduleId));
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("일치하는 사용자가 없습니다. " + userId));
-
-        schedule.getAssignedUsers().add(user);
-        scheduleRepository.save(schedule);
-    }
-
-    public Page<ScheduleResponseDto> getSchedules(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size, Sort.by(Sort.Direction.DESC, "modifiedDate"));
-        return scheduleRepository.findAll(pageable).map(ScheduleResponseDto::new);
+        Schedule schedule = scheduleRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("일치하는 일정이 없습니다. " + id));
+        scheduleRepository.delete(schedule);
     }
 }

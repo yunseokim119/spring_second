@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -18,12 +19,13 @@ public class ScheduleResponseDto {
     private String ownerName;  // 일정 작성자의 유저명
     private LocalDateTime createdDate;  // 일정 생성일
     private LocalDateTime modifiedDate;  // 일정 수정일
-    private Set<Long> assignedUserIds;  // 일정 담당 유저들의 ID
+    private Set<AssignedUserDto> assignedUsers = new HashSet<>();  // 일정 담당 유저들
+
 
     public ScheduleResponseDto() {
     }
 
-    public ScheduleResponseDto(Schedule schedule) {
+    public ScheduleResponseDto(Schedule schedule, boolean includeAssignedUsers) {
         this.id = schedule.getId();
         this.title = schedule.getTitle();
         this.content = schedule.getContent();
@@ -31,8 +33,14 @@ public class ScheduleResponseDto {
         this.ownerName = schedule.getOwner().getUsername();
         this.createdDate = schedule.getCreatedDate();
         this.modifiedDate = schedule.getModifiedDate();
-        this.assignedUserIds = schedule.getScheduleUsers().stream()
-                .map(scheduleUser -> scheduleUser.getUser().getId())
-                .collect(Collectors.toSet());
+        if (includeAssignedUsers) {
+            this.assignedUsers = schedule.getScheduleUsers().stream()
+                    .map(scheduleUser -> new AssignedUserDto(
+                            scheduleUser.getUser().getId(),
+                            scheduleUser.getUser().getUsername(),
+                            scheduleUser.getUser().getEmail()
+                    ))
+                    .collect(Collectors.toSet());
+        }
     }
 }
